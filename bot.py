@@ -1,3 +1,4 @@
+import os
 import discord
 from discord.ext import commands
 import requests
@@ -23,10 +24,14 @@ async def on_ready():
 # ==================== FUNÇÕES DE BUSCA NAS LOJAS ====================
 
 def buscar_steam(nome_jogo):
-    # Usa diretamente a URL de pesquisa da Steam ignorando preferências com o termo buscado
     query = urllib.parse.quote(nome_jogo)
     url = f"https://store.steampowered.com/search/?term={query}&hwtype=0&supportedlang=brazilian&ndl=1&ignore_preferences=1"
     return "Verificar preço na Steam", url
+
+def buscar_steamdb(nome_jogo):
+    query = urllib.parse.quote(nome_jogo)
+    url = f"https://steamdb.info/search/?a=all&q={query}"
+    return "Ver histórico no SteamDB", url
 
 def buscar_nuuvem(nome_jogo):
     url = f"https://www.nuuvem.com/br-pt/catalog/page/1/search/{urllib.parse.quote(nome_jogo)}"
@@ -47,12 +52,13 @@ def buscar_eneba(nome_jogo):
 
 # ==================== COMANDO SLASH ====================
 
-@bot.tree.command(name="promo", description="Compara o preço de um jogo na Steam e busca nas lojas de keys.")
+@bot.tree.command(name="promo", description="Compara o preço de um jogo na Steam, SteamDB e lojas de keys.")
 @discord.app_commands.describe(nome="Nome do jogo que você quer pesquisar")
 async def promo(interaction: discord.Interaction, nome: str):
     await interaction.response.defer(thinking=True)
 
     preco_steam, link_steam = buscar_steam(nome)
+    _, link_steamdb = buscar_steamdb(nome)
     _, link_nuuvem = buscar_nuuvem(nome)
     _, link_fanatical = buscar_fanatical(nome)
     _, link_gmg = buscar_gmg(nome)
@@ -60,18 +66,20 @@ async def promo(interaction: discord.Interaction, nome: str):
 
     embed = discord.Embed(
         title=f"🎮 Comparador de Preços: {nome}",
-        description="Atalhos de busca direta nas principais lojas:",
+        description="Atalhos de busca direta nas principais lojas e histórico:",
         color=discord.Color.blue()
     )
 
     embed.add_field(name="💻 Steam", value=f"[{preco_steam}]({link_steam})", inline=False)
+    embed.add_field(name="📊 SteamDB (Histórico/Menor Preço)", value=f"[Ver histórico no SteamDB]({link_steamdb})", inline=False)
     embed.add_field(name="🛒 Nuuvem", value=f"[Verificar preço na Nuuvem]({link_nuuvem})", inline=False)
     embed.add_field(name="🔑 Fanatical", value=f"[Verificar ofertas na Fanatical]({link_fanatical})", inline=False)
     embed.add_field(name="🟢 Green Man Gaming", value=f"[Verificar ofertas na GMG]({link_gmg})", inline=False)
     embed.add_field(name="🌐 Eneba *(Global/LATAM/BR)*", value=f"[Verificar ofertas na Eneba]({link_eneba})", inline=False)
 
-    embed.set_footer(text="Clique nos links para conferir os valores exatos em cada loja.")
+    embed.set_footer(text="Clique nos links para conferir o histórico e os valores exatos.")
 
     await interaction.followup.send(embed=embed)
 
+TOKEN = os.getenv("DISCORD_TOKEN")
 bot.run("MTIzOTI3MjAwNDE0MjQ5Nzk3NQ.G7iQ1p.-oA-Z5mJ8QRAnBCW3Qu0hrVRX9POLo9KZhrlqY")
