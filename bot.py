@@ -82,4 +82,4 @@ async def promo(interaction: discord.Interaction, nome: str):
     await interaction.followup.send(embed=embed)
 
 TOKEN = os.getenv("DISCORD_TOKEN")
-bot.run("MTIzOTI3MjAwNDE0MjQ5Nzk3NQ.G7iQ1p.-oA-Z5mJ8QRAnBCW3Qu0hrVRX9POLo9KZhrlqY")
+bot.run("token")
